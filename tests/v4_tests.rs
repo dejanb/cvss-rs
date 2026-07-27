@@ -1,5 +1,5 @@
 use cvss_rs as cvss;
-use cvss_rs::{v4_0::CvssV4, ParseError};
+use cvss_rs::{ParseError, v4_0::CvssV4};
 use rstest::rstest;
 use std::str::FromStr;
 
@@ -151,8 +151,6 @@ fn test_v4_0_duplicate_metrics_should_error(#[case] vector: &str, #[case] expect
     let result = vector.parse::<CvssV4>();
     assert!(
         matches!(result, Err(ParseError::DuplicateMetric { ref metric }) if metric == expected_metric),
-        "Expected DuplicateMetric error for metric '{}', but got: {:?}",
-        expected_metric,
-        result
+        "Expected DuplicateMetric error for metric '{expected_metric}', but got: {result:?}"
     );
 }

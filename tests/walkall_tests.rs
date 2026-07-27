@@ -103,7 +103,7 @@ fn test_walkall() -> anyhow::Result<()> {
     let failed = failed_files.lock().unwrap();
     if !failed.is_empty() {
         for (file, error) in failed.iter() {
-            eprintln!("Failed to process file: {:?}, error: {}", file, error);
+            eprintln!("Failed to process file: {file:?}, error: {error}");
         }
         bail!("{} files failed to process", failed.len());
     }
@@ -220,12 +220,12 @@ fn test_walkall() -> anyhow::Result<()> {
 
                 let redhat_status = match mismatch.redhat_score {
                     Some(rh) if (rh - mismatch.calculated_score).abs() < 0.05 => {
-                        format!("✓ RedHat agrees ({:.1}) - CVE DB error", rh)
+                        format!("✓ RedHat agrees ({rh:.1}) - CVE DB error")
                     }
                     Some(rh) if (rh - mismatch.expected_score).abs() < 0.05 => {
-                        format!("✗ RedHat agrees with JSON ({:.1}) - impl issue", rh)
+                        format!("✗ RedHat agrees with JSON ({rh:.1}) - impl issue")
                     }
-                    Some(rh) => format!("? RedHat differs ({:.1})", rh),
+                    Some(rh) => format!("? RedHat differs ({rh:.1})"),
                     None => "? RedHat unavailable".to_string(),
                 };
 
@@ -251,29 +251,29 @@ fn test_walkall() -> anyhow::Result<()> {
                     .unwrap_or("unknown");
                 let base = mismatch
                     .base_score
-                    .map(|s| format!("{:.1}", s))
+                    .map(|s| format!("{s:.1}"))
                     .unwrap_or_else(|| "N/A".to_string());
                 let temporal = mismatch
                     .temporal_score
-                    .map(|s| format!("{:.1}", s))
+                    .map(|s| format!("{s:.1}"))
                     .unwrap_or_else(|| "N/A".to_string());
                 let env = mismatch
                     .environmental_score
-                    .map(|s| format!("{:.1}", s))
+                    .map(|s| format!("{s:.1}"))
                     .unwrap_or_else(|| "N/A".to_string());
 
                 // Red Hat returns base score, so compare with our base_score
                 let redhat_status = match (mismatch.redhat_score, mismatch.base_score) {
                     (Some(rh), Some(base)) if (rh - base).abs() < 0.05 => {
-                        format!("✓ RedHat agrees ({:.1}) - CVE DB error", rh)
+                        format!("✓ RedHat agrees ({rh:.1}) - CVE DB error")
                     }
                     (Some(rh), _) if (rh - mismatch.expected_score).abs() < 0.05 => {
-                        format!("✗ RedHat agrees with JSON ({:.1}) - impl issue", rh)
+                        format!("✗ RedHat agrees with JSON ({rh:.1}) - impl issue")
                     }
                     (Some(rh), Some(base)) => {
-                        format!("? RedHat ({:.1}) vs our base ({:.1})", rh, base)
+                        format!("? RedHat ({rh:.1}) vs our base ({base:.1})")
                     }
-                    (Some(rh), None) => format!("? RedHat: {:.1}", rh),
+                    (Some(rh), None) => format!("? RedHat: {rh:.1}"),
                     (None, _) => "? RedHat unavailable".to_string(),
                 };
 
@@ -302,29 +302,29 @@ fn test_walkall() -> anyhow::Result<()> {
                     .unwrap_or("unknown");
                 let base = mismatch
                     .base_score
-                    .map(|s| format!("{:.1}", s))
+                    .map(|s| format!("{s:.1}"))
                     .unwrap_or_else(|| "N/A".to_string());
                 let temporal = mismatch
                     .temporal_score
-                    .map(|s| format!("{:.1}", s))
+                    .map(|s| format!("{s:.1}"))
                     .unwrap_or_else(|| "N/A".to_string());
                 let env = mismatch
                     .environmental_score
-                    .map(|s| format!("{:.1}", s))
+                    .map(|s| format!("{s:.1}"))
                     .unwrap_or_else(|| "N/A".to_string());
 
                 // Red Hat returns base score, so compare with our base_score
                 let redhat_status = match (mismatch.redhat_score, mismatch.base_score) {
                     (Some(rh), Some(base)) if (rh - base).abs() < 0.05 => {
-                        format!("✓ RedHat agrees ({:.1}) - CVE DB error", rh)
+                        format!("✓ RedHat agrees ({rh:.1}) - CVE DB error")
                     }
                     (Some(rh), _) if (rh - mismatch.expected_score).abs() < 0.05 => {
-                        format!("✗ RedHat agrees with JSON ({:.1}) - impl issue", rh)
+                        format!("✗ RedHat agrees with JSON ({rh:.1}) - impl issue")
                     }
                     (Some(rh), Some(base)) => {
-                        format!("? RedHat ({:.1}) vs our base ({:.1})", rh, base)
+                        format!("? RedHat ({rh:.1}) vs our base ({base:.1})")
                     }
-                    (Some(rh), None) => format!("? RedHat: {:.1}", rh),
+                    (Some(rh), None) => format!("? RedHat: {rh:.1}"),
                     (None, _) => "? RedHat unavailable".to_string(),
                 };
 
@@ -366,16 +366,13 @@ fn test_walkall() -> anyhow::Result<()> {
         println!("║                         MISMATCH SUMMARY                          ║");
         println!("╠═══════════════════════════════════════════════════════════════════╣");
         println!(
-            "║ Total mismatches:         {:>5}                                   ║",
-            total_mismatches
+            "║ Total mismatches:         {total_mismatches:>5}                                   ║"
         );
         println!(
-            "║ CVE DB errors (verified): {:>5}                                   ║",
-            cve_db_errors
+            "║ CVE DB errors (verified): {cve_db_errors:>5}                                   ║"
         );
         println!(
-            "║ Implementation issues:    {:>5}                                   ║",
-            implementation_issues
+            "║ Implementation issues:    {implementation_issues:>5}                                   ║"
         );
         println!(
             "║ V4.0 (unverified):        {:>5}                                   ║",
@@ -384,18 +381,14 @@ fn test_walkall() -> anyhow::Result<()> {
         println!("╚═══════════════════════════════════════════════════════════════════╝\n");
 
         if implementation_issues > 0 {
-            bail!(
-                "Found {} implementation issues that need fixing",
-                implementation_issues
-            );
+            bail!("Found {implementation_issues} implementation issues that need fixing");
         } else if !v4_mismatches.is_empty() {
             println!(
                 "Note: {} V4.0 mismatches found but Red Hat verification unavailable",
                 v4_mismatches.len()
             );
             println!(
-                "V3.x implementation verified as correct by Red Hat ({} CVE DB errors confirmed)",
-                cve_db_errors
+                "V3.x implementation verified as correct by Red Hat ({cve_db_errors} CVE DB errors confirmed)"
             );
         } else {
             println!("All mismatches verified as CVE database errors - implementation is correct!");
@@ -456,10 +449,10 @@ fn verify_with_redhat(vector: &str) -> Option<f64> {
 
     let stdout = String::from_utf8_lossy(&output.stdout);
     for line in stdout.lines() {
-        if line.starts_with("Base Score:") {
-            if let Some(score_str) = line.split_whitespace().nth(2) {
-                return score_str.parse().ok();
-            }
+        if line.starts_with("Base Score:")
+            && let Some(score_str) = line.split_whitespace().nth(2)
+        {
+            return score_str.parse().ok();
         }
     }
     None
@@ -467,8 +460,8 @@ fn verify_with_redhat(vector: &str) -> Option<f64> {
 
 fn process(path: &Path) -> anyhow::Result<ProcessResult> {
     let content = fs::read(path)?;
-    let cve: CveRoot = serde_json::from_slice(&content)
-        .map_err(|e| anyhow!("Failed to deserialize CVE: {}", e))?;
+    let cve: CveRoot =
+        serde_json::from_slice(&content).map_err(|e| anyhow!("Failed to deserialize CVE: {e}"))?;
 
     let mut stats = ScoreStats::default();
     let mut mismatches = Vec::new();
@@ -482,7 +475,7 @@ fn process(path: &Path) -> anyhow::Result<ProcessResult> {
 
                 // Validate JSON score range
                 if !(0.0..=10.0).contains(&json_score) {
-                    bail!("Invalid V2.0 base_score: {}", json_score);
+                    bail!("Invalid V2.0 base_score: {json_score}");
                 }
 
                 // Parse vector and calculate score
@@ -546,7 +539,7 @@ fn process(path: &Path) -> anyhow::Result<ProcessResult> {
                 let json_score = v3_0.base_score;
 
                 if !(0.0..=10.0).contains(&json_score) {
-                    bail!("Invalid V3.0 base_score: {}", json_score);
+                    bail!("Invalid V3.0 base_score: {json_score}");
                 }
 
                 if let Ok(parsed) = CvssV3::from_str(&v3_0.vector_string) {
@@ -607,7 +600,7 @@ fn process(path: &Path) -> anyhow::Result<ProcessResult> {
                 let json_score = v3_1.base_score;
 
                 if !(0.0..=10.0).contains(&json_score) {
-                    bail!("Invalid V3.1 base_score: {}", json_score);
+                    bail!("Invalid V3.1 base_score: {json_score}");
                 }
 
                 if let Ok(parsed) = CvssV3::from_str(&v3_1.vector_string) {
@@ -668,7 +661,7 @@ fn process(path: &Path) -> anyhow::Result<ProcessResult> {
                 let json_score = v4.base_score;
 
                 if !(0.0..=10.0).contains(&json_score) {
-                    bail!("Invalid V4.0 base_score: {}", json_score);
+                    bail!("Invalid V4.0 base_score: {json_score}");
                 }
 
                 // Calculate with our implementation - try BOTH base score and full score

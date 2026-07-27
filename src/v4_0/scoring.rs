@@ -363,11 +363,7 @@ pub fn calculate_score_internal(cvss: &CvssV4, include_threat_metrics: bool) -> 
             // 00 --> 01 or 00 --> 10 (take the higher score)
             let left = lookup_global(&macro_vector.incr_eq6());
             let right = lookup_global(&macro_vector.incr_eq3());
-            if left > right {
-                left
-            } else {
-                right
-            }
+            if left > right { left } else { right }
         } else {
             // 21 --> 32 (does not exist)
             lookup_global(&macro_vector.incr_eq3())
@@ -390,10 +386,8 @@ pub fn calculate_score_internal(cvss: &CvssV4, include_threat_metrics: bool) -> 
             for eq3_eq6_max in &eq3_eq6_maxes {
                 for eq4_max in &eq4_maxes {
                     for eq5_max in &eq5_maxes {
-                        max_vectors.push(format!(
-                            "{}{}{}{}{}",
-                            eq1_max, eq2_max, eq3_eq6_max, eq4_max, eq5_max
-                        ));
+                        max_vectors
+                            .push(format!("{eq1_max}{eq2_max}{eq3_eq6_max}{eq4_max}{eq5_max}"));
                     }
                 }
             }

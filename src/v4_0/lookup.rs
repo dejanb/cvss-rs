@@ -319,7 +319,7 @@ pub(crate) fn max_composed(eq: VectorEq) -> Vec<&'static str> {
         VectorEq::Eq5(0) => vec!["E:A/"],
         VectorEq::Eq5(1) => vec!["E:P/"],
         VectorEq::Eq5(2) => vec!["E:U/"],
-        _ => panic!("Unexpected vector: {:?}", eq),
+        _ => panic!("Unexpected vector: {eq:?}"),
     }
 }
 
@@ -345,6 +345,6 @@ pub(crate) fn max_severity(eq: VectorEq) -> u8 {
         VectorEq::Eq5(0) => 1,
         VectorEq::Eq5(1) => 1,
         VectorEq::Eq5(2) => 1,
-        _ => panic!("Unexpected vector: {:?}", eq),
+        _ => panic!("Unexpected vector: {eq:?}"),
     }
 }

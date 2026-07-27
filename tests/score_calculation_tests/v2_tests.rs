@@ -19,15 +19,14 @@ fn assert_v2_scores(
     expected_environmental: Option<f64>,
 ) {
     let cvss = CvssV2::from_str(vector)
-        .unwrap_or_else(|_| panic!("Failed to parse CVSS v2 vector: {}", vector));
+        .unwrap_or_else(|_| panic!("Failed to parse CVSS v2 vector: {vector}"));
 
     let calculated_base = cvss
         .calculated_base_score()
         .expect("Failed to calculate base score");
     assert_eq!(
         calculated_base, expected_base,
-        "Base score mismatch for vector: {}. Expected: {}, Calculated: {}",
-        vector, expected_base, calculated_base
+        "Base score mismatch for vector: {vector}. Expected: {expected_base}, Calculated: {calculated_base}"
     );
 
     if let Some(expected_temporal) = expected_temporal {
@@ -36,8 +35,7 @@ fn assert_v2_scores(
             .expect("Failed to calculate temporal score");
         assert_eq!(
             calculated_temporal, expected_temporal,
-            "Temporal score mismatch for vector: {}. Expected: {}, Calculated: {}",
-            vector, expected_temporal, calculated_temporal
+            "Temporal score mismatch for vector: {vector}. Expected: {expected_temporal}, Calculated: {calculated_temporal}"
         );
     }
 
@@ -47,8 +45,7 @@ fn assert_v2_scores(
             .expect("Failed to calculate environmental score");
         assert_eq!(
             calculated_environmental, expected_environmental,
-            "Environmental score mismatch for vector: {}. Expected: {}, Calculated: {}",
-            vector, expected_environmental, calculated_environmental
+            "Environmental score mismatch for vector: {vector}. Expected: {expected_environmental}, Calculated: {calculated_environmental}"
         );
     }
 }

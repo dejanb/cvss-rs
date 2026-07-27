@@ -641,22 +641,22 @@ impl fmt::Display for CvssV2 {
         // CVSS v2 typically doesn't include version prefix, but we'll include it for consistency
         write!(f, "AV:")?;
         if let Some(av) = &self.access_vector {
-            write!(f, "{}", av)?;
+            write!(f, "{av}")?;
         }
         if let Some(ac) = &self.access_complexity {
-            write!(f, "/AC:{}", ac)?;
+            write!(f, "/AC:{ac}")?;
         }
         if let Some(au) = &self.authentication {
-            write!(f, "/Au:{}", au)?;
+            write!(f, "/Au:{au}")?;
         }
         if let Some(c) = &self.confidentiality_impact {
-            write!(f, "/C:{}", c)?;
+            write!(f, "/C:{c}")?;
         }
         if let Some(i) = &self.integrity_impact {
-            write!(f, "/I:{}", i)?;
+            write!(f, "/I:{i}")?;
         }
         if let Some(a) = &self.availability_impact {
-            write!(f, "/A:{}", a)?;
+            write!(f, "/A:{a}")?;
         }
 
         Ok(())

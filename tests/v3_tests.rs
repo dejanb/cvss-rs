@@ -1,6 +1,6 @@
 use cvss::v3::AttackVector;
 use cvss_rs as cvss;
-use cvss_rs::{v3::CvssV3, ParseError};
+use cvss_rs::{ParseError, v3::CvssV3};
 use rstest::rstest;
 use std::str::FromStr;
 
@@ -34,7 +34,10 @@ fn test_v3_1_rounding_examples() {
         temporal_score, 9.6,
         "Temporal score should be 9.6 (with E/RL/RC = NotDefined)"
     );
-    assert_eq!(env_score, 9.7, "Environmental score should be 9.7 per CVSS v3.1 formula (with all env metrics = NotDefined)");
+    assert_eq!(
+        env_score, 9.7,
+        "Environmental score should be 9.7 per CVSS v3.1 formula (with all env metrics = NotDefined)"
+    );
 }
 
 #[test]
@@ -131,8 +134,6 @@ fn test_v3_1_duplicate_metrics_should_error(#[case] vector: &str, #[case] expect
     let result = vector.parse::<CvssV3>();
     assert!(
         matches!(result, Err(ParseError::DuplicateMetric { ref metric }) if metric == expected_metric),
-        "Expected DuplicateMetric error for metric '{}', but got: {:?}",
-        expected_metric,
-        result
+        "Expected DuplicateMetric error for metric '{expected_metric}', but got: {result:?}"
     );
 }
