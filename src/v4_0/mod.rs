@@ -719,106 +719,106 @@ impl fmt::Display for CvssV4 {
 
         // Base metrics
         if let Some(av) = &self.attack_vector {
-            write!(f, "/AV:{}", av)?;
+            write!(f, "/AV:{av}")?;
         }
         if let Some(ac) = &self.attack_complexity {
-            write!(f, "/AC:{}", ac)?;
+            write!(f, "/AC:{ac}")?;
         }
         if let Some(at) = &self.attack_requirements {
-            write!(f, "/AT:{}", at)?;
+            write!(f, "/AT:{at}")?;
         }
         if let Some(pr) = &self.privileges_required {
-            write!(f, "/PR:{}", pr)?;
+            write!(f, "/PR:{pr}")?;
         }
         if let Some(ui) = &self.user_interaction {
-            write!(f, "/UI:{}", ui)?;
+            write!(f, "/UI:{ui}")?;
         }
         if let Some(vc) = &self.vuln_confidentiality_impact {
-            write!(f, "/VC:{}", vc)?;
+            write!(f, "/VC:{vc}")?;
         }
         if let Some(vi) = &self.vuln_integrity_impact {
-            write!(f, "/VI:{}", vi)?;
+            write!(f, "/VI:{vi}")?;
         }
         if let Some(va) = &self.vuln_availability_impact {
-            write!(f, "/VA:{}", va)?;
+            write!(f, "/VA:{va}")?;
         }
         if let Some(sc) = &self.sub_confidentiality_impact {
-            write!(f, "/SC:{}", sc)?;
+            write!(f, "/SC:{sc}")?;
         }
         if let Some(si) = &self.sub_integrity_impact {
-            write!(f, "/SI:{}", si)?;
+            write!(f, "/SI:{si}")?;
         }
         if let Some(sa) = &self.sub_availability_impact {
-            write!(f, "/SA:{}", sa)?;
+            write!(f, "/SA:{sa}")?;
         }
 
         // Threat metrics
         if let Some(e) = &self.exploit_maturity {
-            write!(f, "/E:{}", e)?;
+            write!(f, "/E:{e}")?;
         }
 
         // Environmental metrics
         if let Some(cr) = &self.confidentiality_requirement {
-            write!(f, "/CR:{}", cr)?;
+            write!(f, "/CR:{cr}")?;
         }
         if let Some(ir) = &self.integrity_requirement {
-            write!(f, "/IR:{}", ir)?;
+            write!(f, "/IR:{ir}")?;
         }
         if let Some(ar) = &self.availability_requirement {
-            write!(f, "/AR:{}", ar)?;
+            write!(f, "/AR:{ar}")?;
         }
         if let Some(mav) = &self.modified_attack_vector {
-            write!(f, "/MAV:{}", mav)?;
+            write!(f, "/MAV:{mav}")?;
         }
         if let Some(mac) = &self.modified_attack_complexity {
-            write!(f, "/MAC:{}", mac)?;
+            write!(f, "/MAC:{mac}")?;
         }
         if let Some(mat) = &self.modified_attack_requirements {
-            write!(f, "/MAT:{}", mat)?;
+            write!(f, "/MAT:{mat}")?;
         }
         if let Some(mpr) = &self.modified_privileges_required {
-            write!(f, "/MPR:{}", mpr)?;
+            write!(f, "/MPR:{mpr}")?;
         }
         if let Some(mui) = &self.modified_user_interaction {
-            write!(f, "/MUI:{}", mui)?;
+            write!(f, "/MUI:{mui}")?;
         }
         if let Some(mvc) = &self.modified_vuln_confidentiality_impact {
-            write!(f, "/MVC:{}", mvc)?;
+            write!(f, "/MVC:{mvc}")?;
         }
         if let Some(mvi) = &self.modified_vuln_integrity_impact {
-            write!(f, "/MVI:{}", mvi)?;
+            write!(f, "/MVI:{mvi}")?;
         }
         if let Some(mva) = &self.modified_vuln_availability_impact {
-            write!(f, "/MVA:{}", mva)?;
+            write!(f, "/MVA:{mva}")?;
         }
         if let Some(msc) = &self.modified_sub_confidentiality_impact {
-            write!(f, "/MSC:{}", msc)?;
+            write!(f, "/MSC:{msc}")?;
         }
         if let Some(msi) = &self.modified_sub_integrity_impact {
-            write!(f, "/MSI:{}", msi)?;
+            write!(f, "/MSI:{msi}")?;
         }
         if let Some(msa) = &self.modified_sub_availability_impact {
-            write!(f, "/MSA:{}", msa)?;
+            write!(f, "/MSA:{msa}")?;
         }
 
         // Supplemental metrics
         if let Some(s) = &self.safety {
-            write!(f, "/S:{}", s)?;
+            write!(f, "/S:{s}")?;
         }
         if let Some(au) = &self.automatable {
-            write!(f, "/AU:{}", au)?;
+            write!(f, "/AU:{au}")?;
         }
         if let Some(r) = &self.recovery {
-            write!(f, "/R:{}", r)?;
+            write!(f, "/R:{r}")?;
         }
         if let Some(v) = &self.value_density {
-            write!(f, "/V:{}", v)?;
+            write!(f, "/V:{v}")?;
         }
         if let Some(re) = &self.vulnerability_response_effort {
-            write!(f, "/RE:{}", re)?;
+            write!(f, "/RE:{re}")?;
         }
         if let Some(u) = &self.provider_urgency {
-            write!(f, "/U:{}", u)?;
+            write!(f, "/U:{u}")?;
         }
 
         Ok(())

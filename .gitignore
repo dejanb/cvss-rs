@@ -2,3 +2,5 @@
 Cargo.lock
 /.serena
 /.idea
+/web/dist
+/web/dist.trunk-lock

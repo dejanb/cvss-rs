@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString};
 
 use crate::utils::{parse_metrics::parse_metric, prefix};
-use crate::{version::VersionV3, ParseError, Severity as UnifiedSeverity, Version};
+use crate::{ParseError, Severity as UnifiedSeverity, Version, version::VersionV3};
 
 /// Represents a CVSS v3.0 or v3.1 score object.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -725,78 +725,78 @@ impl fmt::Display for CvssV3 {
             "3.1"
         };
 
-        write!(f, "CVSS:{}", version)?;
+        write!(f, "CVSS:{version}")?;
 
         // Base metrics
         if let Some(av) = &self.attack_vector {
-            write!(f, "/AV:{}", av)?;
+            write!(f, "/AV:{av}")?;
         }
         if let Some(ac) = &self.attack_complexity {
-            write!(f, "/AC:{}", ac)?;
+            write!(f, "/AC:{ac}")?;
         }
         if let Some(pr) = &self.privileges_required {
-            write!(f, "/PR:{}", pr)?;
+            write!(f, "/PR:{pr}")?;
         }
         if let Some(ui) = &self.user_interaction {
-            write!(f, "/UI:{}", ui)?;
+            write!(f, "/UI:{ui}")?;
         }
         if let Some(s) = &self.scope {
-            write!(f, "/S:{}", s)?;
+            write!(f, "/S:{s}")?;
         }
         if let Some(c) = &self.confidentiality_impact {
-            write!(f, "/C:{}", c)?;
+            write!(f, "/C:{c}")?;
         }
         if let Some(i) = &self.integrity_impact {
-            write!(f, "/I:{}", i)?;
+            write!(f, "/I:{i}")?;
         }
         if let Some(a) = &self.availability_impact {
-            write!(f, "/A:{}", a)?;
+            write!(f, "/A:{a}")?;
         }
 
         // Temporal metrics
         if let Some(e) = &self.exploit_code_maturity {
-            write!(f, "/E:{}", e)?;
+            write!(f, "/E:{e}")?;
         }
         if let Some(rl) = &self.remediation_level {
-            write!(f, "/RL:{}", rl)?;
+            write!(f, "/RL:{rl}")?;
         }
         if let Some(rc) = &self.report_confidence {
-            write!(f, "/RC:{}", rc)?;
+            write!(f, "/RC:{rc}")?;
         }
 
         // Environmental metrics
         if let Some(cr) = &self.confidentiality_requirement {
-            write!(f, "/CR:{}", cr)?;
+            write!(f, "/CR:{cr}")?;
         }
         if let Some(ir) = &self.integrity_requirement {
-            write!(f, "/IR:{}", ir)?;
+            write!(f, "/IR:{ir}")?;
         }
         if let Some(ar) = &self.availability_requirement {
-            write!(f, "/AR:{}", ar)?;
+            write!(f, "/AR:{ar}")?;
         }
         if let Some(mav) = &self.modified_attack_vector {
-            write!(f, "/MAV:{}", mav)?;
+            write!(f, "/MAV:{mav}")?;
         }
         if let Some(mac) = &self.modified_attack_complexity {
-            write!(f, "/MAC:{}", mac)?;
+            write!(f, "/MAC:{mac}")?;
         }
         if let Some(mpr) = &self.modified_privileges_required {
-            write!(f, "/MPR:{}", mpr)?;
+            write!(f, "/MPR:{mpr}")?;
         }
         if let Some(mui) = &self.modified_user_interaction {
-            write!(f, "/MUI:{}", mui)?;
+            write!(f, "/MUI:{mui}")?;
         }
         if let Some(ms) = &self.modified_scope {
-            write!(f, "/MS:{}", ms)?;
+            write!(f, "/MS:{ms}")?;
         }
         if let Some(mc) = &self.modified_confidentiality_impact {
-            write!(f, "/MC:{}", mc)?;
+            write!(f, "/MC:{mc}")?;
         }
         if let Some(mi) = &self.modified_integrity_impact {
-            write!(f, "/MI:{}", mi)?;
+            write!(f, "/MI:{mi}")?;
         }
         if let Some(ma) = &self.modified_availability_impact {
-            write!(f, "/MA:{}", ma)?;
+            write!(f, "/MA:{ma}")?;
         }
 
         Ok(())
