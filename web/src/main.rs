@@ -148,13 +148,16 @@ fn App() -> impl IntoView {
             && let Some(window) = web_sys::window()
         {
             let clipboard = window.navigator().clipboard();
-            let _ = clipboard.write_text(&url);
-            set_copied.set(true);
-            let handle = set_timeout_with_handle(
-                move || set_copied.set(false),
-                std::time::Duration::from_secs(2),
-            );
-            let _ = handle;
+            let promise = clipboard.write_text(&url);
+            wasm_bindgen_futures::spawn_local(async move {
+                if wasm_bindgen_futures::JsFuture::from(promise).await.is_ok() {
+                    set_copied.set(true);
+                    let _ = set_timeout_with_handle(
+                        move || set_copied.set(false),
+                        std::time::Duration::from_secs(2),
+                    );
+                }
+            });
         }
     };
 
@@ -225,6 +228,18 @@ struct MetricEntry {
     value: String,
 }
 
+macro_rules! collect_metrics {
+    ($cvss:expr, $( ($field:ident, $abbr:expr, $name:expr) ),* $(,)?) => {{
+        let mut entries = Vec::new();
+        $(
+            if let Some(v) = &$cvss.$field {
+                entries.push(MetricEntry { abbr: $abbr, name: $name, value: format!("{v:?}") });
+            }
+        )*
+        entries
+    }};
+}
+
 /// Renders a table of metrics with a group header.
 #[component]
 fn MetricGroup(title: &'static str, entries: Vec<MetricEntry>) -> impl IntoView {
@@ -286,116 +301,32 @@ fn ScoreBanner(
     }
 }
 
-/// Renders the parsed CVSS v2.0 result.
 fn render_v2(cvss: CvssV2) -> impl IntoView {
     let base_score = cvss.calculated_base_score();
     let temporal_score = cvss.calculated_temporal_score();
     let environmental_score = cvss.calculated_environmental_score();
     let severity = base_score.map(severity_from_score_v2).unwrap_or("None");
 
-    let mut base = Vec::new();
-    if let Some(v) = &cvss.access_vector {
-        base.push(MetricEntry {
-            abbr: "AV",
-            name: "Access Vector",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.access_complexity {
-        base.push(MetricEntry {
-            abbr: "AC",
-            name: "Access Complexity",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.authentication {
-        base.push(MetricEntry {
-            abbr: "Au",
-            name: "Authentication",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.confidentiality_impact {
-        base.push(MetricEntry {
-            abbr: "C",
-            name: "Confidentiality Impact",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.integrity_impact {
-        base.push(MetricEntry {
-            abbr: "I",
-            name: "Integrity Impact",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.availability_impact {
-        base.push(MetricEntry {
-            abbr: "A",
-            name: "Availability Impact",
-            value: format!("{v:?}"),
-        });
-    }
-
-    let mut temporal = Vec::new();
-    if let Some(v) = &cvss.exploitability {
-        temporal.push(MetricEntry {
-            abbr: "E",
-            name: "Exploitability",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.remediation_level {
-        temporal.push(MetricEntry {
-            abbr: "RL",
-            name: "Remediation Level",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.report_confidence {
-        temporal.push(MetricEntry {
-            abbr: "RC",
-            name: "Report Confidence",
-            value: format!("{v:?}"),
-        });
-    }
-
-    let mut environmental = Vec::new();
-    if let Some(v) = &cvss.collateral_damage_potential {
-        environmental.push(MetricEntry {
-            abbr: "CDP",
-            name: "Collateral Damage Potential",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.target_distribution {
-        environmental.push(MetricEntry {
-            abbr: "TD",
-            name: "Target Distribution",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.confidentiality_requirement {
-        environmental.push(MetricEntry {
-            abbr: "CR",
-            name: "Confidentiality Requirement",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.integrity_requirement {
-        environmental.push(MetricEntry {
-            abbr: "IR",
-            name: "Integrity Requirement",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.availability_requirement {
-        environmental.push(MetricEntry {
-            abbr: "AR",
-            name: "Availability Requirement",
-            value: format!("{v:?}"),
-        });
-    }
+    let base = collect_metrics!(cvss,
+        (access_vector,          "AV", "Access Vector"),
+        (access_complexity,      "AC", "Access Complexity"),
+        (authentication,         "Au", "Authentication"),
+        (confidentiality_impact, "C",  "Confidentiality Impact"),
+        (integrity_impact,       "I",  "Integrity Impact"),
+        (availability_impact,    "A",  "Availability Impact"),
+    );
+    let temporal = collect_metrics!(cvss,
+        (exploitability,    "E",  "Exploitability"),
+        (remediation_level, "RL", "Remediation Level"),
+        (report_confidence, "RC", "Report Confidence"),
+    );
+    let environmental = collect_metrics!(cvss,
+        (collateral_damage_potential, "CDP", "Collateral Damage Potential"),
+        (target_distribution,         "TD",  "Target Distribution"),
+        (confidentiality_requirement, "CR",  "Confidentiality Requirement"),
+        (integrity_requirement,       "IR",  "Integrity Requirement"),
+        (availability_requirement,    "AR",  "Availability Requirement"),
+    );
 
     view! {
         <div class="success">
@@ -415,7 +346,6 @@ fn render_v2(cvss: CvssV2) -> impl IntoView {
     }
 }
 
-/// Renders the parsed CVSS v3.x result.
 fn render_v3(cvss: CvssV3) -> impl IntoView {
     let version_label = match &cvss.version {
         Some(v) => match v {
@@ -429,165 +359,34 @@ fn render_v3(cvss: CvssV3) -> impl IntoView {
     let environmental_score = cvss.calculated_environmental_score();
     let severity = base_score.map(severity_from_score).unwrap_or("None");
 
-    let mut base = Vec::new();
-    if let Some(v) = &cvss.attack_vector {
-        base.push(MetricEntry {
-            abbr: "AV",
-            name: "Attack Vector",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.attack_complexity {
-        base.push(MetricEntry {
-            abbr: "AC",
-            name: "Attack Complexity",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.privileges_required {
-        base.push(MetricEntry {
-            abbr: "PR",
-            name: "Privileges Required",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.user_interaction {
-        base.push(MetricEntry {
-            abbr: "UI",
-            name: "User Interaction",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.scope {
-        base.push(MetricEntry {
-            abbr: "S",
-            name: "Scope",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.confidentiality_impact {
-        base.push(MetricEntry {
-            abbr: "C",
-            name: "Confidentiality Impact",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.integrity_impact {
-        base.push(MetricEntry {
-            abbr: "I",
-            name: "Integrity Impact",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.availability_impact {
-        base.push(MetricEntry {
-            abbr: "A",
-            name: "Availability Impact",
-            value: format!("{v:?}"),
-        });
-    }
-
-    let mut temporal = Vec::new();
-    if let Some(v) = &cvss.exploit_code_maturity {
-        temporal.push(MetricEntry {
-            abbr: "E",
-            name: "Exploit Code Maturity",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.remediation_level {
-        temporal.push(MetricEntry {
-            abbr: "RL",
-            name: "Remediation Level",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.report_confidence {
-        temporal.push(MetricEntry {
-            abbr: "RC",
-            name: "Report Confidence",
-            value: format!("{v:?}"),
-        });
-    }
-
-    let mut environmental = Vec::new();
-    if let Some(v) = &cvss.confidentiality_requirement {
-        environmental.push(MetricEntry {
-            abbr: "CR",
-            name: "Confidentiality Requirement",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.integrity_requirement {
-        environmental.push(MetricEntry {
-            abbr: "IR",
-            name: "Integrity Requirement",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.availability_requirement {
-        environmental.push(MetricEntry {
-            abbr: "AR",
-            name: "Availability Requirement",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.modified_attack_vector {
-        environmental.push(MetricEntry {
-            abbr: "MAV",
-            name: "Modified Attack Vector",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.modified_attack_complexity {
-        environmental.push(MetricEntry {
-            abbr: "MAC",
-            name: "Modified Attack Complexity",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.modified_privileges_required {
-        environmental.push(MetricEntry {
-            abbr: "MPR",
-            name: "Modified Privileges Required",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.modified_user_interaction {
-        environmental.push(MetricEntry {
-            abbr: "MUI",
-            name: "Modified User Interaction",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.modified_scope {
-        environmental.push(MetricEntry {
-            abbr: "MS",
-            name: "Modified Scope",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.modified_confidentiality_impact {
-        environmental.push(MetricEntry {
-            abbr: "MC",
-            name: "Modified Confidentiality Impact",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.modified_integrity_impact {
-        environmental.push(MetricEntry {
-            abbr: "MI",
-            name: "Modified Integrity Impact",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.modified_availability_impact {
-        environmental.push(MetricEntry {
-            abbr: "MA",
-            name: "Modified Availability Impact",
-            value: format!("{v:?}"),
-        });
-    }
+    let base = collect_metrics!(cvss,
+        (attack_vector,          "AV", "Attack Vector"),
+        (attack_complexity,      "AC", "Attack Complexity"),
+        (privileges_required,    "PR", "Privileges Required"),
+        (user_interaction,       "UI", "User Interaction"),
+        (scope,                  "S",  "Scope"),
+        (confidentiality_impact, "C",  "Confidentiality Impact"),
+        (integrity_impact,       "I",  "Integrity Impact"),
+        (availability_impact,    "A",  "Availability Impact"),
+    );
+    let temporal = collect_metrics!(cvss,
+        (exploit_code_maturity, "E",  "Exploit Code Maturity"),
+        (remediation_level,    "RL", "Remediation Level"),
+        (report_confidence,    "RC", "Report Confidence"),
+    );
+    let environmental = collect_metrics!(cvss,
+        (confidentiality_requirement,      "CR",  "Confidentiality Requirement"),
+        (integrity_requirement,            "IR",  "Integrity Requirement"),
+        (availability_requirement,         "AR",  "Availability Requirement"),
+        (modified_attack_vector,           "MAV", "Modified Attack Vector"),
+        (modified_attack_complexity,       "MAC", "Modified Attack Complexity"),
+        (modified_privileges_required,     "MPR", "Modified Privileges Required"),
+        (modified_user_interaction,        "MUI", "Modified User Interaction"),
+        (modified_scope,                   "MS",  "Modified Scope"),
+        (modified_confidentiality_impact,  "MC",  "Modified Confidentiality Impact"),
+        (modified_integrity_impact,        "MI",  "Modified Integrity Impact"),
+        (modified_availability_impact,     "MA",  "Modified Availability Impact"),
+    );
 
     view! {
         <div class="success">
@@ -607,244 +406,52 @@ fn render_v3(cvss: CvssV3) -> impl IntoView {
     }
 }
 
-/// Renders the parsed CVSS v4.0 result.
 fn render_v4(cvss: CvssV4) -> impl IntoView {
     let score_info = cvss.calculated_score();
     let score = score_info.as_ref().map(|(s, _)| *s);
     let nomenclature = score_info.map(|(_, n)| n.to_string());
     let severity = score.map(severity_from_score).unwrap_or("None");
 
-    let mut base = Vec::new();
-    if let Some(v) = &cvss.attack_vector {
-        base.push(MetricEntry {
-            abbr: "AV",
-            name: "Attack Vector",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.attack_complexity {
-        base.push(MetricEntry {
-            abbr: "AC",
-            name: "Attack Complexity",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.attack_requirements {
-        base.push(MetricEntry {
-            abbr: "AT",
-            name: "Attack Requirements",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.privileges_required {
-        base.push(MetricEntry {
-            abbr: "PR",
-            name: "Privileges Required",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.user_interaction {
-        base.push(MetricEntry {
-            abbr: "UI",
-            name: "User Interaction",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.vuln_confidentiality_impact {
-        base.push(MetricEntry {
-            abbr: "VC",
-            name: "Vuln. Confidentiality",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.vuln_integrity_impact {
-        base.push(MetricEntry {
-            abbr: "VI",
-            name: "Vuln. Integrity",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.vuln_availability_impact {
-        base.push(MetricEntry {
-            abbr: "VA",
-            name: "Vuln. Availability",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.sub_confidentiality_impact {
-        base.push(MetricEntry {
-            abbr: "SC",
-            name: "Sub. Confidentiality",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.sub_integrity_impact {
-        base.push(MetricEntry {
-            abbr: "SI",
-            name: "Sub. Integrity",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.sub_availability_impact {
-        base.push(MetricEntry {
-            abbr: "SA",
-            name: "Sub. Availability",
-            value: format!("{v:?}"),
-        });
-    }
-
-    let mut threat = Vec::new();
-    if let Some(v) = &cvss.exploit_maturity {
-        threat.push(MetricEntry {
-            abbr: "E",
-            name: "Exploit Maturity",
-            value: format!("{v:?}"),
-        });
-    }
-
-    let mut environmental = Vec::new();
-    if let Some(v) = &cvss.confidentiality_requirement {
-        environmental.push(MetricEntry {
-            abbr: "CR",
-            name: "Confidentiality Requirement",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.integrity_requirement {
-        environmental.push(MetricEntry {
-            abbr: "IR",
-            name: "Integrity Requirement",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.availability_requirement {
-        environmental.push(MetricEntry {
-            abbr: "AR",
-            name: "Availability Requirement",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.modified_attack_vector {
-        environmental.push(MetricEntry {
-            abbr: "MAV",
-            name: "Modified Attack Vector",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.modified_attack_complexity {
-        environmental.push(MetricEntry {
-            abbr: "MAC",
-            name: "Modified Attack Complexity",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.modified_attack_requirements {
-        environmental.push(MetricEntry {
-            abbr: "MAT",
-            name: "Modified Attack Requirements",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.modified_privileges_required {
-        environmental.push(MetricEntry {
-            abbr: "MPR",
-            name: "Modified Privileges Required",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.modified_user_interaction {
-        environmental.push(MetricEntry {
-            abbr: "MUI",
-            name: "Modified User Interaction",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.modified_vuln_confidentiality_impact {
-        environmental.push(MetricEntry {
-            abbr: "MVC",
-            name: "Modified Vuln. Confidentiality",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.modified_vuln_integrity_impact {
-        environmental.push(MetricEntry {
-            abbr: "MVI",
-            name: "Modified Vuln. Integrity",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.modified_vuln_availability_impact {
-        environmental.push(MetricEntry {
-            abbr: "MVA",
-            name: "Modified Vuln. Availability",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.modified_sub_confidentiality_impact {
-        environmental.push(MetricEntry {
-            abbr: "MSC",
-            name: "Modified Sub. Confidentiality",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.modified_sub_integrity_impact {
-        environmental.push(MetricEntry {
-            abbr: "MSI",
-            name: "Modified Sub. Integrity",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.modified_sub_availability_impact {
-        environmental.push(MetricEntry {
-            abbr: "MSA",
-            name: "Modified Sub. Availability",
-            value: format!("{v:?}"),
-        });
-    }
-
-    let mut supplemental = Vec::new();
-    if let Some(v) = &cvss.safety {
-        supplemental.push(MetricEntry {
-            abbr: "S",
-            name: "Safety",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.automatable {
-        supplemental.push(MetricEntry {
-            abbr: "AU",
-            name: "Automatable",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.recovery {
-        supplemental.push(MetricEntry {
-            abbr: "R",
-            name: "Recovery",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.value_density {
-        supplemental.push(MetricEntry {
-            abbr: "V",
-            name: "Value Density",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.vulnerability_response_effort {
-        supplemental.push(MetricEntry {
-            abbr: "RE",
-            name: "Response Effort",
-            value: format!("{v:?}"),
-        });
-    }
-    if let Some(v) = &cvss.provider_urgency {
-        supplemental.push(MetricEntry {
-            abbr: "U",
-            name: "Provider Urgency",
-            value: format!("{v:?}"),
-        });
-    }
+    let base = collect_metrics!(cvss,
+        (attack_vector,              "AV", "Attack Vector"),
+        (attack_complexity,          "AC", "Attack Complexity"),
+        (attack_requirements,        "AT", "Attack Requirements"),
+        (privileges_required,        "PR", "Privileges Required"),
+        (user_interaction,           "UI", "User Interaction"),
+        (vuln_confidentiality_impact,"VC", "Vuln. Confidentiality"),
+        (vuln_integrity_impact,      "VI", "Vuln. Integrity"),
+        (vuln_availability_impact,   "VA", "Vuln. Availability"),
+        (sub_confidentiality_impact, "SC", "Sub. Confidentiality"),
+        (sub_integrity_impact,       "SI", "Sub. Integrity"),
+        (sub_availability_impact,    "SA", "Sub. Availability"),
+    );
+    let threat = collect_metrics!(cvss,
+        (exploit_maturity, "E", "Exploit Maturity"),
+    );
+    let environmental = collect_metrics!(cvss,
+        (confidentiality_requirement,             "CR",  "Confidentiality Requirement"),
+        (integrity_requirement,                   "IR",  "Integrity Requirement"),
+        (availability_requirement,                "AR",  "Availability Requirement"),
+        (modified_attack_vector,                  "MAV", "Modified Attack Vector"),
+        (modified_attack_complexity,              "MAC", "Modified Attack Complexity"),
+        (modified_attack_requirements,            "MAT", "Modified Attack Requirements"),
+        (modified_privileges_required,            "MPR", "Modified Privileges Required"),
+        (modified_user_interaction,               "MUI", "Modified User Interaction"),
+        (modified_vuln_confidentiality_impact,    "MVC", "Modified Vuln. Confidentiality"),
+        (modified_vuln_integrity_impact,          "MVI", "Modified Vuln. Integrity"),
+        (modified_vuln_availability_impact,       "MVA", "Modified Vuln. Availability"),
+        (modified_sub_confidentiality_impact,     "MSC", "Modified Sub. Confidentiality"),
+        (modified_sub_integrity_impact,           "MSI", "Modified Sub. Integrity"),
+        (modified_sub_availability_impact,        "MSA", "Modified Sub. Availability"),
+    );
+    let supplemental = collect_metrics!(cvss,
+        (safety,                       "S",  "Safety"),
+        (automatable,                  "AU", "Automatable"),
+        (recovery,                     "R",  "Recovery"),
+        (value_density,                "V",  "Value Density"),
+        (vulnerability_response_effort,"RE", "Response Effort"),
+        (provider_urgency,             "U",  "Provider Urgency"),
+    );
 
     view! {
         <div class="success">

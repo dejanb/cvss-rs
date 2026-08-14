@@ -6,6 +6,8 @@
 [![Documentation](https://docs.rs/cvss-rs/badge.svg)](https://docs.rs/cvss-rs)
 [![License](https://img.shields.io/crates/l/cvss-rs.svg)](LICENSE)
 
+[**Try the online vector validator**](https://scm-rs.github.io/cvss-rs/)
+
 ---
 
 ## About
