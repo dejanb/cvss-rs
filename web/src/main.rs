@@ -307,25 +307,36 @@ fn render_v2(cvss: CvssV2) -> impl IntoView {
     let environmental_score = cvss.calculated_environmental_score();
     let severity = base_score.map(severity_from_score_v2).unwrap_or("None");
 
-    let base = collect_metrics!(cvss,
-        (access_vector,          "AV", "Access Vector"),
-        (access_complexity,      "AC", "Access Complexity"),
-        (authentication,         "Au", "Authentication"),
-        (confidentiality_impact, "C",  "Confidentiality Impact"),
-        (integrity_impact,       "I",  "Integrity Impact"),
-        (availability_impact,    "A",  "Availability Impact"),
+    let base = collect_metrics!(
+        cvss,
+        (access_vector, "AV", "Access Vector"),
+        (access_complexity, "AC", "Access Complexity"),
+        (authentication, "Au", "Authentication"),
+        (confidentiality_impact, "C", "Confidentiality Impact"),
+        (integrity_impact, "I", "Integrity Impact"),
+        (availability_impact, "A", "Availability Impact"),
     );
-    let temporal = collect_metrics!(cvss,
-        (exploitability,    "E",  "Exploitability"),
+    let temporal = collect_metrics!(
+        cvss,
+        (exploitability, "E", "Exploitability"),
         (remediation_level, "RL", "Remediation Level"),
         (report_confidence, "RC", "Report Confidence"),
     );
-    let environmental = collect_metrics!(cvss,
-        (collateral_damage_potential, "CDP", "Collateral Damage Potential"),
-        (target_distribution,         "TD",  "Target Distribution"),
-        (confidentiality_requirement, "CR",  "Confidentiality Requirement"),
-        (integrity_requirement,       "IR",  "Integrity Requirement"),
-        (availability_requirement,    "AR",  "Availability Requirement"),
+    let environmental = collect_metrics!(
+        cvss,
+        (
+            collateral_damage_potential,
+            "CDP",
+            "Collateral Damage Potential"
+        ),
+        (target_distribution, "TD", "Target Distribution"),
+        (
+            confidentiality_requirement,
+            "CR",
+            "Confidentiality Requirement"
+        ),
+        (integrity_requirement, "IR", "Integrity Requirement"),
+        (availability_requirement, "AR", "Availability Requirement"),
     );
 
     view! {
@@ -359,33 +370,60 @@ fn render_v3(cvss: CvssV3) -> impl IntoView {
     let environmental_score = cvss.calculated_environmental_score();
     let severity = base_score.map(severity_from_score).unwrap_or("None");
 
-    let base = collect_metrics!(cvss,
-        (attack_vector,          "AV", "Attack Vector"),
-        (attack_complexity,      "AC", "Attack Complexity"),
-        (privileges_required,    "PR", "Privileges Required"),
-        (user_interaction,       "UI", "User Interaction"),
-        (scope,                  "S",  "Scope"),
-        (confidentiality_impact, "C",  "Confidentiality Impact"),
-        (integrity_impact,       "I",  "Integrity Impact"),
-        (availability_impact,    "A",  "Availability Impact"),
+    let base = collect_metrics!(
+        cvss,
+        (attack_vector, "AV", "Attack Vector"),
+        (attack_complexity, "AC", "Attack Complexity"),
+        (privileges_required, "PR", "Privileges Required"),
+        (user_interaction, "UI", "User Interaction"),
+        (scope, "S", "Scope"),
+        (confidentiality_impact, "C", "Confidentiality Impact"),
+        (integrity_impact, "I", "Integrity Impact"),
+        (availability_impact, "A", "Availability Impact"),
     );
-    let temporal = collect_metrics!(cvss,
-        (exploit_code_maturity, "E",  "Exploit Code Maturity"),
-        (remediation_level,    "RL", "Remediation Level"),
-        (report_confidence,    "RC", "Report Confidence"),
+    let temporal = collect_metrics!(
+        cvss,
+        (exploit_code_maturity, "E", "Exploit Code Maturity"),
+        (remediation_level, "RL", "Remediation Level"),
+        (report_confidence, "RC", "Report Confidence"),
     );
-    let environmental = collect_metrics!(cvss,
-        (confidentiality_requirement,      "CR",  "Confidentiality Requirement"),
-        (integrity_requirement,            "IR",  "Integrity Requirement"),
-        (availability_requirement,         "AR",  "Availability Requirement"),
-        (modified_attack_vector,           "MAV", "Modified Attack Vector"),
-        (modified_attack_complexity,       "MAC", "Modified Attack Complexity"),
-        (modified_privileges_required,     "MPR", "Modified Privileges Required"),
-        (modified_user_interaction,        "MUI", "Modified User Interaction"),
-        (modified_scope,                   "MS",  "Modified Scope"),
-        (modified_confidentiality_impact,  "MC",  "Modified Confidentiality Impact"),
-        (modified_integrity_impact,        "MI",  "Modified Integrity Impact"),
-        (modified_availability_impact,     "MA",  "Modified Availability Impact"),
+    let environmental = collect_metrics!(
+        cvss,
+        (
+            confidentiality_requirement,
+            "CR",
+            "Confidentiality Requirement"
+        ),
+        (integrity_requirement, "IR", "Integrity Requirement"),
+        (availability_requirement, "AR", "Availability Requirement"),
+        (modified_attack_vector, "MAV", "Modified Attack Vector"),
+        (
+            modified_attack_complexity,
+            "MAC",
+            "Modified Attack Complexity"
+        ),
+        (
+            modified_privileges_required,
+            "MPR",
+            "Modified Privileges Required"
+        ),
+        (
+            modified_user_interaction,
+            "MUI",
+            "Modified User Interaction"
+        ),
+        (modified_scope, "MS", "Modified Scope"),
+        (
+            modified_confidentiality_impact,
+            "MC",
+            "Modified Confidentiality Impact"
+        ),
+        (modified_integrity_impact, "MI", "Modified Integrity Impact"),
+        (
+            modified_availability_impact,
+            "MA",
+            "Modified Availability Impact"
+        ),
     );
 
     view! {
@@ -412,45 +450,90 @@ fn render_v4(cvss: CvssV4) -> impl IntoView {
     let nomenclature = score_info.map(|(_, n)| n.to_string());
     let severity = score.map(severity_from_score).unwrap_or("None");
 
-    let base = collect_metrics!(cvss,
-        (attack_vector,              "AV", "Attack Vector"),
-        (attack_complexity,          "AC", "Attack Complexity"),
-        (attack_requirements,        "AT", "Attack Requirements"),
-        (privileges_required,        "PR", "Privileges Required"),
-        (user_interaction,           "UI", "User Interaction"),
-        (vuln_confidentiality_impact,"VC", "Vuln. Confidentiality"),
-        (vuln_integrity_impact,      "VI", "Vuln. Integrity"),
-        (vuln_availability_impact,   "VA", "Vuln. Availability"),
+    let base = collect_metrics!(
+        cvss,
+        (attack_vector, "AV", "Attack Vector"),
+        (attack_complexity, "AC", "Attack Complexity"),
+        (attack_requirements, "AT", "Attack Requirements"),
+        (privileges_required, "PR", "Privileges Required"),
+        (user_interaction, "UI", "User Interaction"),
+        (vuln_confidentiality_impact, "VC", "Vuln. Confidentiality"),
+        (vuln_integrity_impact, "VI", "Vuln. Integrity"),
+        (vuln_availability_impact, "VA", "Vuln. Availability"),
         (sub_confidentiality_impact, "SC", "Sub. Confidentiality"),
-        (sub_integrity_impact,       "SI", "Sub. Integrity"),
-        (sub_availability_impact,    "SA", "Sub. Availability"),
+        (sub_integrity_impact, "SI", "Sub. Integrity"),
+        (sub_availability_impact, "SA", "Sub. Availability"),
     );
-    let threat = collect_metrics!(cvss,
-        (exploit_maturity, "E", "Exploit Maturity"),
+    let threat = collect_metrics!(cvss, (exploit_maturity, "E", "Exploit Maturity"),);
+    let environmental = collect_metrics!(
+        cvss,
+        (
+            confidentiality_requirement,
+            "CR",
+            "Confidentiality Requirement"
+        ),
+        (integrity_requirement, "IR", "Integrity Requirement"),
+        (availability_requirement, "AR", "Availability Requirement"),
+        (modified_attack_vector, "MAV", "Modified Attack Vector"),
+        (
+            modified_attack_complexity,
+            "MAC",
+            "Modified Attack Complexity"
+        ),
+        (
+            modified_attack_requirements,
+            "MAT",
+            "Modified Attack Requirements"
+        ),
+        (
+            modified_privileges_required,
+            "MPR",
+            "Modified Privileges Required"
+        ),
+        (
+            modified_user_interaction,
+            "MUI",
+            "Modified User Interaction"
+        ),
+        (
+            modified_vuln_confidentiality_impact,
+            "MVC",
+            "Modified Vuln. Confidentiality"
+        ),
+        (
+            modified_vuln_integrity_impact,
+            "MVI",
+            "Modified Vuln. Integrity"
+        ),
+        (
+            modified_vuln_availability_impact,
+            "MVA",
+            "Modified Vuln. Availability"
+        ),
+        (
+            modified_sub_confidentiality_impact,
+            "MSC",
+            "Modified Sub. Confidentiality"
+        ),
+        (
+            modified_sub_integrity_impact,
+            "MSI",
+            "Modified Sub. Integrity"
+        ),
+        (
+            modified_sub_availability_impact,
+            "MSA",
+            "Modified Sub. Availability"
+        ),
     );
-    let environmental = collect_metrics!(cvss,
-        (confidentiality_requirement,             "CR",  "Confidentiality Requirement"),
-        (integrity_requirement,                   "IR",  "Integrity Requirement"),
-        (availability_requirement,                "AR",  "Availability Requirement"),
-        (modified_attack_vector,                  "MAV", "Modified Attack Vector"),
-        (modified_attack_complexity,              "MAC", "Modified Attack Complexity"),
-        (modified_attack_requirements,            "MAT", "Modified Attack Requirements"),
-        (modified_privileges_required,            "MPR", "Modified Privileges Required"),
-        (modified_user_interaction,               "MUI", "Modified User Interaction"),
-        (modified_vuln_confidentiality_impact,    "MVC", "Modified Vuln. Confidentiality"),
-        (modified_vuln_integrity_impact,          "MVI", "Modified Vuln. Integrity"),
-        (modified_vuln_availability_impact,       "MVA", "Modified Vuln. Availability"),
-        (modified_sub_confidentiality_impact,     "MSC", "Modified Sub. Confidentiality"),
-        (modified_sub_integrity_impact,           "MSI", "Modified Sub. Integrity"),
-        (modified_sub_availability_impact,        "MSA", "Modified Sub. Availability"),
-    );
-    let supplemental = collect_metrics!(cvss,
-        (safety,                       "S",  "Safety"),
-        (automatable,                  "AU", "Automatable"),
-        (recovery,                     "R",  "Recovery"),
-        (value_density,                "V",  "Value Density"),
-        (vulnerability_response_effort,"RE", "Response Effort"),
-        (provider_urgency,             "U",  "Provider Urgency"),
+    let supplemental = collect_metrics!(
+        cvss,
+        (safety, "S", "Safety"),
+        (automatable, "AU", "Automatable"),
+        (recovery, "R", "Recovery"),
+        (value_density, "V", "Value Density"),
+        (vulnerability_response_effort, "RE", "Response Effort"),
+        (provider_urgency, "U", "Provider Urgency"),
     );
 
     view! {
