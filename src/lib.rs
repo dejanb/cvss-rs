@@ -129,3 +129,25 @@ pub enum Severity {
     High,
     Critical,
 }
+
+/// Maps a base score to its severity rating, following the FIRST v3/v4
+/// banding: `None` below 0.1, `Low` below 4.0, `Medium` below 7.0,
+/// `High` below 9.0, `Critical` from 9.0.
+///
+/// The score is rounded to one decimal first (scaled-integer rounding,
+/// the rule the CSAF validation tests use), so a computed 1-decimal
+/// score maps exactly. Scores outside 0.0..=10.0 yield `None`.
+pub fn score_to_severity(score: f64) -> Option<Severity> {
+    if !score.is_finite() {
+        return None;
+    }
+    let scaled = (score * 10.0).round() as i32;
+    Some(match scaled {
+        0 => Severity::None,
+        1..=39 => Severity::Low,
+        40..=69 => Severity::Medium,
+        70..=89 => Severity::High,
+        90..=100 => Severity::Critical,
+        _ => return None,
+    })
+}
