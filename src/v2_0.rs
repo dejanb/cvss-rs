@@ -79,6 +79,25 @@ pub enum Severity {
     High,
 }
 
+/// Maps a base score to its v2.0 severity rating, following the FIRST
+/// v2.0 banding: `Low` below 4.0, `Medium` below 7.0, `High` from 7.0.
+///
+/// The score is rounded to one decimal first (scaled-integer rounding,
+/// the same rule [`crate::score_to_severity`] documents). Scores
+/// outside 0.0..=10.0 yield `None`.
+pub fn score_to_severity(score: f64) -> Option<Severity> {
+    if !score.is_finite() {
+        return None;
+    }
+    let scaled = (score * 10.0).round() as i32;
+    Some(match scaled {
+        0..=39 => Severity::Low,
+        40..=69 => Severity::Medium,
+        70..=100 => Severity::High,
+        _ => return None,
+    })
+}
+
 /// Represents the access vector metric.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, EnumString, Display)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
